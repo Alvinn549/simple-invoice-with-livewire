@@ -82,22 +82,26 @@
                                             @enderror
                                         </td>
                                         <td>
-                                            <input wire:model="products.{{ $key }}.quantity" type="number"
-                                                class="form-control" wire:keyup="getTotal({{ $key }})">
+                                            <input maxlength="16" wire:model="products.{{ $key }}.quantity"
+                                                type="text" class="form-control"
+                                                wire:keyup="checkQuantity({{ $key }})">
                                             @error("products.$key.quantity")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
                                         <td>
-                                            <input wire:model="products.{{ $key }}.harga_satuan"
-                                                type="number" class="form-control"
-                                                wire:keyup="getTotal({{ $key }})">
+                                            <input maxlength="16"
+                                                wire:model="products.{{ $key }}.harga_satuan" type="text"
+                                                class="form-control"
+                                                wire:keyup="checkHargaSatuan({{ $key }})">
                                             @error("products.$key.harga_satuan")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+
                                         <td>
-                                            {{ isset($product['total']) ? 'Rp. ' . number_format($product['total'], 2, '.', ',') : '' }}
+                                            {{ isset($product['total']) ? 'Rp. ' . number_format($product['total']) : '' }}
                                         </td>
                                         <td style="text-align: center">
                                             <button wire:click="removeRow({{ $key }})" type="button"
@@ -113,7 +117,7 @@
                                         <td colspan="4">
                                             <div class="row justify-content-end">
                                                 <div class="col-3">
-                                                   <label class="fw-bold">Tipe Diskon: &nbsp;</label>
+                                                    <label class="fw-bold">Tipe Diskon: &nbsp;</label>
                                                     <select wire:model="diskonType" class="form-select"
                                                         wire:change="resetDiskonType">
                                                         <option value="">--pilih diskon--</option>
@@ -146,7 +150,7 @@
                                             @endif
                                         </td>
                                         <td style="text-align: end"><strong>Total:</strong></td>
-                                        <td>{{ 'Rp. ' . number_format($allTotal, 2, '.', ',') }}</td>
+                                        <td>{{ 'Rp. ' . number_format($allTotal) }}</td>
                                     </tr>
 
                                 @endif

@@ -21,18 +21,12 @@ class Invoice extends Component
         'name' => 'required|string',
         'products' => 'required',
         'products.*.deskripsi' => 'required|string',
-        'products.*.quantity' => 'required|numeric',
-        'products.*.harga_satuan' => 'required|numeric',
          'diskonInPercent' => 'nullable|numeric|min:0|max:100',
     ];
 
     protected $messages = [
         'products.*.deskripsi.required' => 'The Deskripsi field is required.',
         'products.*.deskripsi.string' => 'The Deskripsi field for each product must be a string.',
-        'products.*.quantity.required' => 'The Quantity field is required.',
-        'products.*.quantity.numeric' => 'The Quantity field for each product must be a numeric.',
-        'products.*.harga_satuan.required' => 'The Harga Satuan field is required.',
-        'products.*.harga_satuan.numeric' => 'The Harga Satuan field for each product must be a numeric.',
     ];
 
     public function mount()
@@ -49,7 +43,13 @@ class Invoice extends Component
 
         $this->resetValidation();
         $nextNumber = count($this->products) + 1;
-        $this->products[] = ['no' => $nextNumber, 'deskripsi' => null, 'quantity' => null, 'harga_satuan' => null];
+
+        $this->products[] = [
+            'no' => $nextNumber, 
+            'deskripsi' => null, 
+            'quantity' => null, 
+            'harga_satuan' => null
+        ];
     }
 
     public function removeRow($key)
@@ -64,11 +64,34 @@ class Invoice extends Component
         $this->getOverallTotal(); 
     }
 
+    public function checkHargaSatuan($key)
+    {
+        $this->changeFormatNumberHargaSatuan($key);
+        $this->getTotal($key);
+    }
+
+    public function checkQuantity($key)
+    {
+        $this->changeFormatNumberQuantity($key);
+        $this->getTotal($key);
+    }
+
+    public function changeFormatNumberQuantity($key)
+    {
+        $this->products[$key]['quantity'] = number_format((int) str_replace(',', '', $this->products[$key]['quantity']), 0, '.', ',');
+    }
+
+    public function changeFormatNumberHargaSatuan($key)
+    {
+        $this->products[$key]['harga_satuan'] = number_format((int) str_replace(',', '', $this->products[$key]['harga_satuan']), 0, '.', ',');
+    }
+
+
     public function getTotal($key)
     {
-        $quantity = $this->products[$key]['quantity'];
-        $hargaSatuan = $this->products[$key]['harga_satuan'];
-
+        $quantity = (int) str_replace(',', '', $this->products[$key]['quantity']);
+        $hargaSatuan = (int) str_replace(',', '', $this->products[$key]['harga_satuan']);
+        
         if (is_numeric($quantity) && is_numeric($hargaSatuan)) {
             $total = $quantity * $hargaSatuan;
             $this->products[$key]['total'] = $total;
@@ -83,7 +106,7 @@ class Invoice extends Component
     {
         $subtotal = array_sum(array_column($this->products, 'total'));
 
-       if ($this->diskonType === 'percent') {
+        if ($this->diskonType === 'percent') {
             $discountAmount = $this->diskonInPercent ? ($subtotal * ($this->diskonInPercent / 100)) : 0;
         } elseif ($this->diskonType === 'nominal') {
             $discountAmount = $this->diskonInNominal ? $this->diskonInNominal : 0;
@@ -114,11 +137,9 @@ class Invoice extends Component
     public function resetDiskonType()
     {
         if ($this->diskonType === 'percent') {
-             $this->reset(
-            'diskonInNominal');
+             $this->reset('diskonInNominal');
         } elseif ($this->diskonType === 'nominal') {
-             $this->reset('diskonInPercent',
-            );
+             $this->reset('diskonInPercent');
         } else {
             $this->reset([
             'diskonInNominal',
@@ -127,6 +148,7 @@ class Invoice extends Component
         }
         $this->getOverallTotal();
     }
+
 
     public function render()
     {

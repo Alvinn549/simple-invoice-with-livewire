@@ -55,8 +55,6 @@
     </style>
 </head>
 
-<!-- ... Your HTML and head section remain unchanged ... -->
-
 <body>
     <div class="invoice">
         <h1>Invoice</h1>
@@ -80,8 +78,8 @@
                         <td>{{ $product['no'] }}</td>
                         <td>{{ $product['deskripsi'] }}</td>
                         <td>{{ $product['quantity'] }}</td>
-                        <td>{{ 'Rp. ' . number_format($product['harga_satuan'], 2, '.', ',') }}</td>
-                        <td>{{ 'Rp. ' . number_format($product['total'], 2, '.', ',') }}
+                        <td>{{ 'Rp. ' . number_format((int) str_replace(',', '', $product['harga_satuan'])) }}</td>
+                        <td>{{ 'Rp. ' . number_format((int) str_replace(',', '', $product['total'])) }}
                         </td>
                     </tr>
                 @endforeach
